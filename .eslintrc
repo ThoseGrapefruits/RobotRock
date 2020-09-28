@@ -1,0 +1,7 @@
+%YAML 1.2
+---
+env:
+  es6: true
+root: true
+extends:
+  - defaults

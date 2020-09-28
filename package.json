@@ -1,0 +1,16 @@
+{
+  "name": "robot-rock",
+  "version": "0.0.1",
+  "scripts": {
+    "watch": "cross-env node --experimental-json-modules --harmony-logical-assignment --harmony-top-level-await --no-warnings ./watch.mjs start:main",
+    "start:main": "cross-env node --experimental-json-modules --harmony-logical-assignment --harmony-top-level-await --no-warnings ./src/main.mjs"
+  },
+  "dependencies": {
+    "adafruit-pca9685": "^0.1.4",
+    "chokidar": "^3.4.2",
+    "express": "^4.17.1",
+    "express-ws": "^4.0.0",
+    "kalmanjs": "^1.1.0",
+    "mpu6050-gyro": "^1.1.1"
+  }
+}
