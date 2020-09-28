@@ -1,6 +1,4 @@
 import express from 'express';
-import expressWS from 'express-ws';
-expressWS(app);
 
 import path from 'path';
 import process from 'process';
@@ -13,15 +11,17 @@ express.static.mime.define({'application/javascript': ['md']});
 
 export async function startServer() {
   const app = express();
+  const { default: expressWS } = await import('express-ws');
+  expressWS(app);
 
   app.use('/', express.static(path.join(cwd, 'src/client')));
 
-  app.get('/', function(req, res){
-    res.sendFile(path.join(cwd + 'src/client/index.html'));
+  app.get('/', function(request, response){
+    response.sendFile(path.join(cwd + 'src/client/index.html'));
   });
   
-  app.ws('/', function(ws, req) {
-    ws.on('message', function(msg) {
+  app.ws('/', function(ws, request) {
+    ws.on('message', function(message) {
       console.log(`websocket received: ${ message }`);
       handleRawInput(message)
     });

@@ -29,7 +29,7 @@ export async function connect() {
 
   if (!isConnecting()) {
     const url = new URL(location.origin);
-    url.protocol = 'wss:';
+    url.protocol = 'ws:';
     bopper = new WebSocket(url);
     bopper.addEventListener('message', handleMessage);
   }
@@ -56,6 +56,8 @@ export async function connect() {
     }
 
     function onOpen() {
+      console.log('🕸🥊 Sockem bopped.');
+
       cleanUp();
       resolve();
     }
@@ -82,6 +84,8 @@ export async function disconnect() {
     }
 
     function onClose() {
+      console.log('✋🥊 Sockem stopped.');
+
       cleanUp();
       resolve();
     }
