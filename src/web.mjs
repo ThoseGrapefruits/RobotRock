@@ -22,7 +22,6 @@ export async function startServer() {
   
   app.ws('/', function(ws, request) {
     ws.on('message', function(message) {
-      console.log(`websocket received: ${ message }`);
       handleRawInput(message)
     });
 

@@ -1,19 +1,23 @@
 // import { initRobot } from './state.mjs';
 import { startServer } from './web.mjs';
-import { getLatestInput } from './input.mjs';
+import { addInputListener } from './input.mjs';
 
 await startServer();
 
-let state = {}; // initRobot();
-
 let exit = () => {};
 
-setInterval(() => {
-  const input = getLatestInput();
-  state = step({ input, state });
-}, 1);
-
 void async function main() {
+  let state = {}; // initRobot();
+
+  addInputListener((input, timeSinceLastInput) => {
+    console.log(timeSinceLastInput);
+    state = step({
+      input,
+      timeSinceLastInput,
+      state
+    });
+  });
+
   await new Promise(resolve => {
     exit = resolve;
   })
@@ -24,14 +28,14 @@ void async function main() {
 //
 //
 //
-//               ⊕    ┌───────┐
-//               │  ╒═╡   ◎   ╞═╕
+//               +    ┌───────┐
+//               │  ╒═╡  fwd  ╞═╕
 //              ┌┴┐  0│       │0
 // π 180°        X  ╒═╡       ╞═╕          0° 0
 //              └┬┘  1│       │1
 //               │  ╒═╡       ╞═╕
-//               ⊖   2┕━━━━━━━┙2
-//                 ⊖────[ Y ]────⊕
+//               -   2┕━━━━━━━┙2
+//                 - ───[ Y ]─── +
 //
 //
 //                       270°
