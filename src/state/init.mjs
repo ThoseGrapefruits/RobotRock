@@ -3,7 +3,7 @@ import PWM from 'adafruit-pca9685';
 
 import PID from './pid.mjs';
 
-export function initRobot({
+export default function initRobot({
   pid={ p: 5, i: 0.01, d: 0 },
   filter={ Q: 0.001, R: 0.1 }
 } = {}) {

@@ -1,4 +1,4 @@
-// import { initRobot } from './state.mjs';
+import { init, lean, move } from './state/index.mjs';
 import { startServer } from './web.mjs';
 import { addInputListener } from './input.mjs';
 
@@ -7,7 +7,7 @@ await startServer();
 let exit = () => {};
 
 void async function main() {
-  let state = {}; // initRobot();
+  let state = initRobot();
 
   addInputListener((input, timeSinceLastInput) => {
     console.log(timeSinceLastInput);
@@ -23,27 +23,30 @@ void async function main() {
   })
 }()
 
+process.on('SIGINT', () => {
+  exit();
+});
+
 //                       π/2
 //                       90°
 //
 //
 //
-//               +    ┌───────┐
-//               │  ╒═╡  fwd  ╞═╕
-//              ┌┴┐  0│       │0
-// π 180°        X  ╒═╡       ╞═╕          0° 0
-//              └┬┘  1│       │1
-//               │  ╒═╡       ╞═╕
-//               -   2┕━━━━━━━┙2
-//                 - ───[ Y ]─── +
+//             +      ┌───────┐
+//             │    ╒═╡  fwd  ╞═╕
+//            ┌┴┐  1 0│       │X 11
+// π 180°      X    ╒═╡   13  ╞═╕          0° 0
+//            └┬┘  3 2│  12   │8 9
+//             │    ╒═╡       ╞═╕
+//             -   5 4┕━━━━━━━┙6 7
 //
+//                 - ───[ Y ]─── +
 //
 //                       270°
 //                       3π/2
 
-function step({
-  input,
-  state: { legs, filter, pid, gyro, pwm }
-}) {
-  return {};
+function step(context) {
+  context = lean(context);
+  context = move(context);
+  return leaned;
 }
