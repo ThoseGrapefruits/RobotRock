@@ -5,17 +5,19 @@ import PID from './pid.mjs';
 
 export default function initRobot({
   pid={ p: 5, i: 0.01, d: 0 },
-  filter={ Q: 0.001, R: 0.1 }
+  gyroFilter={ Q: 0.001, R: 0.1 }
 } = {}) {
   return {
     // Active
-    filter: {
-      x: new KalmanFilter(...filter),
-      y: new KalmanFilter(...filter),
-    },
-    legs: {
-      left: initLegSide(),
-      right: initLegSide()
+    servos: {
+      camera: {
+        x: initServo(12),
+        y: initServo(13)
+      },
+      legs: {
+        left: initLegSide(0),
+        right: initLegSide(6)
+      }
     },
     pid: {
       x: new PID(pid),
@@ -23,28 +25,34 @@ export default function initRobot({
     },
 
     // Inputs and Controllers
-    gyro: new MPU6050(1, 0x68),
+    gyro: {
+      controller: new MPU6050(1, 0x68),
+      filter: {
+        x: new KalmanFilter(...gyroFilter),
+        y: new KalmanFilter(...gyroFilter),
+      },
+    },
     pwm: PWM({
       debug: true
     }),
   };
 }
 
-function initLegSide() {
-  return [ 0, 1, 2 ].map(initLeg);
+function initLegSide(start) {
+  return [ start, start + 2, start + 4 ].map(initLeg);
 }
 
-function initLeg() {
+function initLeg(start) {
   return {
-    elbom: initServo(),
-    shoulder: initServo()
+    elbow: initServo(start + 1),
+    shoulder: initServo(start)
   };
 }
 
-function initServo() {
+function initServo(index) {
   return {
+    index,
     positionGoal: 300,
-    positionCurrent: 300,
-    position,
+    position: 300,
   };
 }

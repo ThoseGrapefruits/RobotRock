@@ -1,4 +1,4 @@
-import { init, lean, move } from './state/index.mjs';
+import { normalizeInput, init, lean, move } from './state/index.mjs';
 import { startServer } from './web.mjs';
 import { addInputListener } from './input.mjs';
 
@@ -7,7 +7,7 @@ await startServer();
 let exit = () => {};
 
 void async function main() {
-  let state = initRobot();
+  let state = init();
 
   addInputListener((input, timeSinceLastInput) => {
     console.log(timeSinceLastInput);
@@ -45,7 +45,23 @@ process.on('SIGINT', () => {
 //                       270°
 //                       3π/2
 
+
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+// 
+
 function step(context) {
+  context = normalizeInput(context);
   context = lean(context);
   context = move(context);
   return leaned;
