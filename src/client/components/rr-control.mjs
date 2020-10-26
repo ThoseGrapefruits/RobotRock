@@ -92,8 +92,8 @@ class RRControlElement extends LitElement {
               y: axes[1]
             },
             right: {
-              x: axes[0],
-              y: axes[1]
+              x: axes[2],
+              y: axes[3]
             }
           }
         }
