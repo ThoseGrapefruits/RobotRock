@@ -1,28 +1,57 @@
 import { normalizeInput, init, lean, move } from './state/index.mjs';
 import { startServer } from './web.mjs';
 import { addInputListener } from './input.mjs';
+import settleServos from './state/settle-servos.mjs';
 
 await startServer();
 
+const TICK_INTERVAL = 16;
+
 let exit = () => {};
+
+// There are 2 callback/timer things running over each other here.
+//
+//   1. A client-side "game loop" that is capturing input and sending it along
+//      whenever the values change. This is where most of the state changes
+//      happen, but not necessarily the actual movement.
+//   2. A server-side "tick" interval that is trying to settle the servos into
+//      their desired positions, smoothed out by a PID controller.
+//
+// They can and will run in any order, flip-flopping betwween the two, but
+// because all JavaScript engines are single-threaded, only one of them will
+// truly be running at any one time.
 
 void async function main() {
   let state = init();
 
   addInputListener((input, timeSinceLastInput) => {
-    console.log(timeSinceLastInput);
     state = step({
       input,
+      state,
       timeSinceLastInput,
-      state
     });
   });
 
+  let lastTickTime = undefined;
+  const interval = setInterval(() => {
+    const now = process.hrtime.bigint();
+    const timeSinceLastTick = now - lastTickTime ?? now;
+    state = tick({
+      input,
+      state,
+      timeSinceLastTick,
+    });
+  }, TICK_INTERVAL);
+
   await new Promise(resolve => {
-    exit = resolve;
+    exit = () => {
+      clearInterval(interval);
+      resolve();
+    };
   })
 }()
 
+// Ctrl+C received on the server command line, or shutdown, or something.
 process.on('SIGINT', () => {
   exit();
 });
@@ -73,5 +102,10 @@ function step(context) {
   context = normalizeInput(context);
   context = lean(context);
   context = move(context);
-  return leaned;
+  return context.state;
+}
+
+function tick(context) {
+  context = settleServos(context);
+  return context.state;
 }

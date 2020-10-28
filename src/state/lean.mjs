@@ -1,5 +1,3 @@
-const DEAD_ZONE = 0.01;
-
 export default function lean(context) {
   const {
     input: {
@@ -11,14 +9,14 @@ export default function lean(context) {
     state
   } = context;
 
-  const shouldLean = Math.abs(x) > DEAD_ZONE || Math.abs(y) > DEAD_ZONE;
+  const shouldLean = buttonsPressed.has(4);
 
-  console.log(buttonsPressed);
+
 
   return {
     ...context,
-    input: {
-      ...context.input,
+    state: {
+      ...state,
       leaned: shouldLean
     }
   };

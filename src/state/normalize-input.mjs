@@ -7,9 +7,9 @@ export default function normalizeInput({ input, state }) {
       axes: {
         left: vectorizeJoystick(input.axes.left),
         right: vectorizeJoystick(input.axes.right),
-      }
-    },
-    state
+      },
+      buttonsPressed: new Set(input.buttonsPressed)
+    }
   };
 }
 

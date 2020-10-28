@@ -1,23 +1,18 @@
 TODO
 ====
 
-Controls — Basic
+Controls
 ----------------
 [ ] Stubbed controller
-[ ] Find replacement libraries
+[x] Find replacement libraries
 [ ] Basic controls
+[ ] Leaning (first movement milestone)
+[ ] Jumping (obvs. you expect me to make a non-jumping spider robot?)
+[ ] Toggles (crouch, movement speed, etc)
 
 Web Interface
 -------------
-[ ] Web socket communication
+[x] Web socket communication
 [ ] Display servo info
-
-Web Interface — Advanced
-------------------------
-[ ] Controller input
+[x] Controller input
 [ ] Video streaming
-
-Controls — Advanced
--------------------
-[ ] Leaning
-[ ] Jumping (obvs. you expect me to make a non-jumping spider robot?)
