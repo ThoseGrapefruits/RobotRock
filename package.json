@@ -2,8 +2,8 @@
   "name": "robot-rock",
   "version": "0.0.1",
   "scripts": {
-    "watch": "cross-env node --experimental-json-modules --harmony-logical-assignment --harmony-top-level-await --no-warnings ./watch.mjs start:main",
-    "start:main": "cross-env node --experimental-json-modules --harmony-logical-assignment --harmony-top-level-await --no-warnings ./src/main.mjs"
+    "watch": "node --experimental-json-modules --harmony-logical-assignment --harmony-top-level-await --no-warnings ./watch.mjs start:main",
+    "start:main": "node --experimental-json-modules --harmony-logical-assignment --harmony-top-level-await --no-warnings ./src/main.mjs"
   },
   "dependencies": {
     "adafruit-pca9685": "^0.1.4",
