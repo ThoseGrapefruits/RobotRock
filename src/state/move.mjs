@@ -1,12 +1,9 @@
-export default function move({
-  input,
-  state
-}) {
+export default function move(context) {
   if (state.leaned) {
     return;
   }
 
   // TODO
 
-  return { input, state };
+  return context;
 }

@@ -1,7 +1,9 @@
 import { vectorFromJoystick } from '../util/index.mjs';
 
-export default function normalizeInput({ input, state }) {
+export default function normalizeInput(context) {
+  const { input } = context;
   return {
+    ...context,
     input: {
       ...input,
       axes: {

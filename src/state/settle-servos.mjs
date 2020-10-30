@@ -1,8 +1,6 @@
 // Move servos towards their goal positions
-export default function settleServos({
-  input,
-  state
-}) {
+export default function settleServos(context) {
+  const { state } = context;
   const { pwm, servos } = state;
 
   for (const servo of servos.all()) {
@@ -12,5 +10,5 @@ export default function settleServos({
     pwm.setPwm(index, 0, position.current);
   }
 
-  return { input, state };
+  return context;
 }

@@ -32,12 +32,11 @@ void async function main() {
     });
   });
 
-  let lastTickTime = undefined;
+  let lastTickTime;
   const interval = setInterval(() => {
     const now = process.hrtime.bigint();
-    const timeSinceLastTick = now - lastTickTime ?? now;
+    const timeSinceLastTick = now - (lastTickTime ?? now);
     state = tick({
-      input,
       state,
       timeSinceLastTick,
     });
