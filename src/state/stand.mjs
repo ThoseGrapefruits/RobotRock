@@ -8,7 +8,7 @@ export default function stand({
     return;
   }
 
-  const { pwm, servos } = state;
+  const { servos } = state;
 
   for (const servo of servos.all()) {
     servo.position = servo.POSITION_NEUTRAL;

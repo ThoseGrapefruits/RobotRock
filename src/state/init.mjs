@@ -26,8 +26,18 @@ export default function initRobot({
     }),
     servos: {
       camera: {
-        x: initServo(12),
-        y: initServo(13)
+        x: initServo(12, {
+          position: {
+            max: 500,
+            min: 100,
+          }
+        }),
+        y: initServo(13, {
+          position: {
+            max: 500,
+            min: 270,
+          }
+        })
       },
       legs: {
         * all() {
@@ -56,7 +66,7 @@ function initLeg(start) {
   };
 }
 
-function initServo(index) {
+function initServo(index, { position={} }={}) {
   return {
     index,
     pid: new PID({
@@ -64,12 +74,21 @@ function initServo(index) {
       kI: 0.01,
       kD: 0,
     }),
-    positionGoal: 300,
-    position: 300,
-    POSITION_NEUTRAL: 300,
 
-    // NOTE: Any "soft" updates to servo position (want to use PID) should only
-    // update `position`. Any "hard" updates should update both `position` and
-    // `positionGoal` as well as call `pwm.setPwm` directly.
+    position: {
+      // NOTE: Any "soft" updates to servo position (want to use PID) should
+      // only update `goal`. Any "hard" updates should update both `current` and
+      // `goal` as well as call `pwm.setPwm` directly.
+      current: 300,
+      goal: 300,
+      max: 560,
+      min: 100,
+      neutral: 300,
+      ...position,
+
+      get range() {
+        return this.max - this.min;
+      }
+    }
   };
 }

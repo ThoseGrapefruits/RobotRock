@@ -11,7 +11,17 @@ export default function lean(context) {
 
   const shouldLean = buttonsPressed.has(4);
 
+  if (shouldLean) {
+    const { servos: { legs } } = state;
 
+    legs.left.forEach(({ elbow, shoulder }, index) => {
+      elbow.position.goal = scaleAxisToServo(-y, elbow);
+    });
+
+    legs.right.forEach(({ elbow, shoulder }, index) => {
+      elbow.position.goal = scaleAxisToServo(y, elbow);
+    });
+  }
 
   return {
     ...context,
@@ -20,4 +30,8 @@ export default function lean(context) {
       leaned: shouldLean
     }
   };
+}
+
+function scaleAxisToServo(input, servo) {
+  return input * servo.range / 2;
 }

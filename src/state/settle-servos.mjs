@@ -6,9 +6,10 @@ export default function settleServos({
   const { pwm, servos } = state;
 
   for (const servo of servos.all()) {
-    const error = servo.position - servo.positionGoal;
-    servo.position += servo.pid.step(error);
-    pwm.setPwm(servo.index, 0, servo.position);
+    const { index, position } = servo;
+    const error = position.current - position.goal;
+    position.current += pid.step(error);
+    pwm.setPwm(index, 0, position.current);
   }
 
   return { input, state };
