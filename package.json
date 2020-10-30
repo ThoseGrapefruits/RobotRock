@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "scripts": {
     "watch": "node --experimental-json-modules --harmony-logical-assignment --harmony-top-level-await --no-warnings ./watch.mjs start:main",
-    "start:main": "node --experimental-json-modules --harmony-logical-assignment --harmony-top-level-await --no-warnings ./src/main.mjs"
+    "start:main": "node --experimental-json-modules --harmony-logical-assignment --harmony-top-level-await --no-warnings ./src/main.mjs",
+    "preinstall": "sudo sh ./preinstall.sh"
   },
   "dependencies": {
     "adafruit-pca9685": "^0.1.4",
