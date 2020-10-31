@@ -1,11 +1,10 @@
-import { normalizeInput, init, lean, move } from './state/index.mjs';
-import { startServer } from './web.mjs';
-import { addInputListener } from './input.mjs';
-import settleServos from './state/settle-servos.mjs';
+const { normalizeInput, init, lean, move } = require('./state/index.js');
+const { startServer } = require('./web.js');
+const { addInputListener, handleRawInput } = require('./input.js');
+const settleServos = require('./state/settle-servos.js');
 
-await startServer();
-
-const TICK_INTERVAL = 16;
+const NANO = 1e9;
+const TICK_INTERVAL = 4;
 
 let exit = () => {};
 
@@ -32,19 +31,24 @@ void async function main() {
     });
   });
 
-  let lastTickTime;
+  let lastTickTime = process.hrtime();
   const interval = setInterval(() => {
-    const now = process.hrtime.bigint();
-    const timeSinceLastTick = now - (lastTickTime ?? now);
+    const [ seconds, nanoseconds ] = process.hrtime(lastTickTime)
+    lastTickTime = process.hrtime();
     state = tick({
       state,
-      timeSinceLastTick,
+      timeSinceLastTick: seconds * NANO + nanoseconds,
     });
   }, TICK_INTERVAL);
 
+  const server = await startServer({
+    handleRawInput
+  });
+
   await new Promise(resolve => {
-    exit = () => {
+    exit = async () => {
       clearInterval(interval);
+      await server.close();
       resolve();
     };
   })
@@ -98,13 +102,21 @@ process.on('SIGINT', () => {
 //      ╰────╯                         ╰────╯
 
 function step(context) {
-  context = normalizeInput(context);
-  context = lean(context);
-  context = move(context);
+  context = assert(normalizeInput(context));
+  context = assert(lean(context));
+  context = assert(move(context));
   return context.state;
 }
 
 function tick(context) {
-  context = settleServos(context);
+  context = assert(settleServos(context));
   return context.state;
+}
+
+function assert(x) {
+  if (x == null) {
+    throw new Error();
+  }
+
+  return x;
 }

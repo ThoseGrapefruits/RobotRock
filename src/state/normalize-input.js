@@ -1,6 +1,6 @@
-import { vectorFromJoystick } from '../util/index.mjs';
+const { vectorFromJoystick } = require('../util/index.js');
 
-export default function normalizeInput(context) {
+function normalizeInput(context) {
   const { input } = context;
   return {
     ...context,
@@ -21,3 +21,5 @@ function vectorizeJoystick(joystick) {
     ...vectorFromJoystick(joystick)
   };
 }
+
+module.exports = normalizeInput;

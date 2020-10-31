@@ -1,5 +1,5 @@
-import chokidar from 'chokidar';
-import { exec } from 'child_process';
+const chokidar = require('chokidar');
+const cp = require('child_process');
 
 let appProcesses;
 
@@ -23,7 +23,7 @@ function createAppProcesses() {
   const msg = appProcesses ? 'restarted' : 'started';
 
   appProcesses = commands.map(command => {
-    const process = exec(`npm run ${ command }`, {
+    const process = cp.exec(`npm run ${ command }`, {
       stdio: "inherit",
       shell: true
     })

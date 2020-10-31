@@ -1,17 +1,17 @@
-import express from 'express';
+const express = require('express');
 
-import path from 'path';
-import process from 'process';
-
-import { handleRawInput } from './input.mjs';
+const path = require('path');
+const process = require('process');
 
 const cwd = process.cwd();
 
 express.static.mime.define({'application/javascript': ['md']});
 
-export async function startServer() {
+async function startServer({
+  handleRawInput
+}) {
   const app = express();
-  const { default: expressWS } = await import('express-ws');
+  const expressWS = require('express-ws');
   expressWS(app);
 
   app.use('/', express.static(path.join(cwd, 'src/client')));
@@ -30,5 +30,9 @@ export async function startServer() {
     })
   });
   
-  app.listen(8080);
+  return app.listen(8080);
 }
+
+module.exports = {
+  startServer
+};

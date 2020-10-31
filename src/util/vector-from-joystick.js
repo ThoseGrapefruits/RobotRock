@@ -1,6 +1,6 @@
 const TAU = Math.PI * 2;
 
-export default function vectorFromJoystick({ x, y }) {
+function vectorFromJoystick({ x, y }) {
   const direction = Math.atan2(y, x);
   const directionAbsolute = direction < 0
     ? TAU + direction
@@ -29,3 +29,5 @@ export default function vectorFromJoystick({ x, y }) {
 
 // The circle is the unit circle, and the outer square is the boundary of
 // possible {x,y} values.
+
+module.exports = vectorFromJoystick
