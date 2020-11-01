@@ -6,7 +6,9 @@ const settleServos = require('./state/settle-servos.js');
 const NANO = 1e9;
 const TICK_INTERVAL = 4;
 
-let exit = () => {};
+let exit = () => {
+  process.exit(0); // in case we get killed during init
+};
 
 // There are 2 callback/timer things running over each other here.
 //
@@ -48,8 +50,10 @@ void async function main() {
   await new Promise(resolve => {
     exit = async () => {
       clearInterval(interval);
+      state?.pwm?.stop();
       await server.close();
       resolve();
+      process.exit(0);
     };
   })
 }()
