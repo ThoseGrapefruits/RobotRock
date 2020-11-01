@@ -1,8 +1,7 @@
 function stand(context) {
-  const { state } = context;
-  const { leaned, moved } = state;
+  const { input, state } = context;
 
-  if (!leaned && !moved) {
+  if (input.buttonsPressed.has(3)) {
     const { servos } = state;
 
     for (const servo of servos.legs.all()) {
