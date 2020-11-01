@@ -1,20 +1,5 @@
 const TAU = Math.PI * 2;
 
-function vectorFromJoystick({ x, y }) {
-  const direction = Math.atan2(y, x);
-  const directionAbsolute = direction < 0
-    ? TAU + direction
-    : direction;
-
-  const rawMagnitude = Math.sqrt(x ** 2 + y ** 2);
-  const maxMagnitude = Math.abs(x) > Math.abs(y)
-    ? 1 / Math.sin(direction)
-    : 1 / Math.cos(direction);
-  const magnitude = rawMagnitude / Math.abs(maxMagnitude);
-
-  return { direction, directionAbsolute, magnitude };
-}
-
 // Getting a normalised magnitude is a bit funky. The controller gives back axis
 // coordinates that are in the range of [0, 1] on each axis. This means that the
 // maximum possible magnitude in any direction is variable just based on the
@@ -29,5 +14,20 @@ function vectorFromJoystick({ x, y }) {
 
 // The circle is the unit circle, and the outer square is the boundary of
 // possible {x,y} values.
+
+function vectorFromJoystick({ x, y }) {
+  const direction = Math.atan2(y, x);
+  const directionAbsolute = direction < 0
+    ? TAU + direction
+    : direction;
+
+  const rawMagnitude = Math.sqrt(x ** 2 + y ** 2);
+  const maxMagnitude = Math.abs(x) > Math.abs(y)
+    ? 1 / Math.sin(direction)
+    : 1 / Math.cos(direction);
+  const magnitude = rawMagnitude / Math.abs(maxMagnitude);
+
+  return { direction, directionAbsolute, magnitude };
+}
 
 module.exports = vectorFromJoystick

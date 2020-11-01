@@ -16,3 +16,7 @@ Web Interface
 [ ] Display servo info
 [x] Controller input
 [ ] Video streaming
+
+Bugs
+----
+[ ] Figure out why input over revived socket connection doesn't get applied
