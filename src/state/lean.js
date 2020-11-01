@@ -1,3 +1,5 @@
+const scaleAxisToServo = require('../util/scale-axis-to-servo.js');
+
 let justLeaned = false;
 
 function lean(context) {
@@ -41,14 +43,6 @@ function lean(context) {
       leaned: shouldLean
     }
   };
-}
-
-function scaleAxisToServo(input, servo) {
-  const { neutral, range } = servo.position;
-  // TODO deal with asymmetrical range
-  const result = input * range / 2 + neutral;
-
-  return result;
 }
 
 module.exports = lean;
