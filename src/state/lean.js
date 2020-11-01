@@ -18,13 +18,13 @@ function lean(context) {
     const { servos: { legs } } = state;
 
     legs.left.forEach(({ elbow, shoulder }, index) => {
-      elbow.position.goal = scaleAxisToServo(x, elbow);
+      elbow.position.goal = scaleAxisToServo(-x, elbow);
       shoulder.position.goal = scaleAxisToServo(y, elbow);
     });
 
     legs.right.forEach(({ elbow, shoulder }, index) => {
-      elbow.position.goal = scaleAxisToServo(x, elbow);
-      shoulder.position.goal = scaleAxisToServo(y, elbow);
+      elbow.position.goal = scaleAxisToServo(-x, elbow);
+      shoulder.position.goal = scaleAxisToServo(-y, elbow);
     });
   } else if (justLeaned) {
     justLeaned = false;

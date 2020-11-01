@@ -7,12 +7,12 @@ function settleServos(context) {
     const { index, pid, position } = servo;
     const error = position.goal - position.current;
     position.current += pid.step(error);
-    console.log(
-      'C',
-      `${ index }`.padStart(2, ' '),
-      `${ error }`.padEnd(10, ' '),
-      position.current
-    );
+    // console.log(
+    //   'C',
+    //   `${ index }`.padStart(2, ' '),
+    //   `${ error }`.padEnd(10, ' '),
+    //   position.current
+    // );
     pwm.setPwm(index, 0, position.current);
   }
 
