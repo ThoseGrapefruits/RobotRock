@@ -1,6 +1,9 @@
 {
   "name": "robot-rock",
   "version": "0.0.1",
+  "engines": {
+    "node": "9"
+  },
   "scripts": {
     "watch": "node ./watch.js start:main",
     "start:main": "node ./src/main.js",
