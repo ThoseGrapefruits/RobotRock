@@ -1,7 +1,7 @@
-const scaleAxisToServo = require('../util/scale-axis-to-servo.js');
+const { scaleAxisToServo } = require('../util/index.js');
 
 const SPEED = 0.1;
-const DEAD_ZONE = 0.01;
+const DEAD_ZONE = 0.02;
 const PI_HALF = Math.PI / 2;
 const PI_QUARTER = Math.PI / 2;
 
@@ -20,11 +20,11 @@ function move(context) {
 
   const shouldMove = !state.leaned &&
     [ axes.left.magnitude, axes.right.magnitude ]
-      .some(magnitude => DEAD_ZONE >= magnitude);
+      .some(magnitude => DEAD_ZONE <= magnitude);
 
   if (shouldMove) {
-    distances.left  += SPEED * left.magnitude;
-    distances.right += SPEED * right.magnitude;
+    distances.left  += SPEED * axes.left.magnitude;
+    distances.right += SPEED * axes.right.magnitude;
 
     const { servos } = state;
 
@@ -37,31 +37,39 @@ function move(context) {
       const normalizedMovementAngle = Math.abs(axis.direction % PI_HALF);
       // If it's less than about 45°, then we can do efficient sideways motion
       const sidewaysMotion = normalizedMovementAngle <= PI_QUARTER;
+      const neutralAngle = sideIndex
+        ? 0
+        : Math.PI;
 
       if (sidewaysMotion) {
         legs.forEach(({ elbow, shoulder }, legIndex) => {
           // casting boolean to number, sorry
           const shift = (legIndex % 2 === sideIndex % 2) * PI_HALF;
 
-          elbow.goal    = scaleAxisToServo(Math.sin(distance + shift));
-          shoulder.goal = scaleAngleToServo(axis.direction);
+          elbow.position.goal
+            = scaleAxisToServo(Math.sin(distance + shift), elbow);
+          shoulder.position.goal
+            = scaleAngleToServo(axis.direction, shoulder, neutralAngle);
+          
+          if (sideIndex == 0 && legIndex === 0) {
+            console.log(
+              `${ shoulder.position.goal }`.padEnd(20, ' '),
+              `${ elbow.position.goal }`.padEnd(20, ' ')
+            );
+          }
         });
       } else {
         legs.forEach(({ elbow, shoulder }, legIndex) => {
           // casting boolean to number, sorry
           const shift = (legIndex % 2 === sideIndex % 2) * PI_HALF;
 
-          elbow.goal    = Math.sin(distance);
-          shoulder.goal = scaleAxisToServo(Math.sin(distance + shift));
+          elbow.position.goal
+            = scaleAngleToServo(Math.sin(distance), elbow);
+          shoulder.position.goal
+            = scaleAxisToServo(Math.sin(distance + shift), shoulder);
         });
       }
     })
-
-    legs.left.forEach((leg, index) => {
-      const wave = index % 2 === 0 ? Math.sin : Math.cos;
-
-      leg.position.goal = wave()
-    });
   } else {
     distances.left = 0;
     distances.right = 0;
@@ -76,8 +84,11 @@ function move(context) {
   };
 }
 
-function scaleAngleToServo(angle, servo) {
-  // TODO
+function scaleAngleToServo(angle, servo, neutralAngle = 0) {
+  const relativeAngle = angle + neutralAngle;
+  const { rangeAngle } = servo.position;
+
+  return relativeAngle * rangeAngle / 3 + servo.position.mid;
 }
 
 module.exports = move;

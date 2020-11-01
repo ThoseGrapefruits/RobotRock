@@ -1,10 +1,10 @@
-const { normalizeInput, init, lean, move } = require('./state/index.js');
+const { normalizeInput, init, lean, move, stand } = require('./state/index.js');
 const { startServer } = require('./web.js');
 const { addInputListener, handleRawInput } = require('./input.js');
 const settleServos = require('./state/settle-servos.js');
 
 const NANO = 1e9;
-const TICK_INTERVAL = 4;
+const TICK_INTERVAL = 10;
 
 let exit = () => {
   process.exit(0); // in case we get killed during init
@@ -25,6 +25,10 @@ let exit = () => {
 void async function main() {
   let state = init();
 
+  // Only settle even filters at first to reduce the chance of drawing too much
+  // power at once and causing the pi to shutoff due to undervoltage.
+  state.servoSettleFilter = ({ index }) => index % 2 === 0;
+
   addInputListener((input, timeSinceLastInput) => {
     state = step({
       input,
@@ -43,14 +47,25 @@ void async function main() {
     });
   }, TICK_INTERVAL);
 
+  // Start settling all servos once initialization period is over.
+  setTimeout(() => {
+    delete state.servoSettleFilter;
+  }, 500);
+
   const server = await startServer({
     handleRawInput
   });
 
   await new Promise(resolve => {
+    console.log('Robot running!');
     exit = async () => {
       clearInterval(interval);
-      state?.pwm?.stop();
+
+      // This should be the right thing to do but it seems to kill the PWM
+      // if (state) {
+      //   state.pwm.stop()
+      // }
+
       await server.close();
       resolve();
       process.exit(0);
@@ -109,6 +124,7 @@ function step(context) {
   context = assert(normalizeInput(context));
   context = assert(lean(context));
   context = assert(move(context));
+  context = assert(stand(context));
   return context.state;
 }
 

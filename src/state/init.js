@@ -107,7 +107,7 @@ function initServo(index, { position={} }={}) {
         this._goal = minmax(assertNonNaN(value), this.min, this.max);
       },
 
-      _max: 560,
+      _max: 520,
       get max() {
         return this._max;
       },
@@ -115,7 +115,7 @@ function initServo(index, { position={} }={}) {
         this._max = assertNonNaN(value);
       },
 
-      _min: 100,
+      _min: 140,
       get min() {
         return this._min;
       },
@@ -139,6 +139,13 @@ function initServo(index, { position={} }={}) {
 
       get range() {
         return this.max - this.min;
+      },
+
+      get rangeAngle() {
+        // TODO I don't actually know what the position-to-radians ratio is.
+        // Based on the ranges the original program had, and the physical
+        // limitations of servo movement, 600 seems reasonable.
+        return this.range / 600;
       }
     }
   };

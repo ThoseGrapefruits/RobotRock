@@ -25,7 +25,7 @@ function vectorFromJoystick({ x, y }) {
   const maxMagnitude = Math.abs(x) > Math.abs(y)
     ? 1 / Math.sin(direction)
     : 1 / Math.cos(direction);
-  const magnitude = rawMagnitude / Math.abs(maxMagnitude);
+  const magnitude = Math.min(1, rawMagnitude / Math.abs(maxMagnitude));
 
   return { direction, directionAbsolute, magnitude };
 }

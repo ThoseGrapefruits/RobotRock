@@ -20,3 +20,4 @@ Web Interface
 Bugs
 ----
 [ ] Figure out why input over revived socket connection doesn't get applied
+[ ] Fix watch

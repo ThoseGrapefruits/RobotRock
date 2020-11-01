@@ -1,4 +1,4 @@
-const scaleAxisToServo = require('../util/scale-axis-to-servo.js');
+const { scaleAxisToServo } = require('../util/index.js');
 
 let justLeaned = false;
 
