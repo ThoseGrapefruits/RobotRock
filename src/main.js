@@ -27,7 +27,7 @@ void async function main() {
 
   // Only settle even filters at first to reduce the chance of drawing too much
   // power at once and causing the pi to shutoff due to undervoltage.
-  state.servoSettleFilter = ({ index }) => index % 2 === 0;
+  state.settleServoFilter = ({ index }) => index % 2 === 0;
 
   addInputListener((input, timeSinceLastInput) => {
     state = step({
@@ -49,7 +49,7 @@ void async function main() {
 
   // Start settling all servos once initialization period is over.
   setTimeout(() => {
-    delete state.servoSettleFilter;
+    delete state.settleServoFilter;
   }, 500);
 
   const server = await startServer({

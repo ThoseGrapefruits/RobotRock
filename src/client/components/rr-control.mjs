@@ -63,21 +63,21 @@ class RRControlElement extends LitElement {
 
   lööp = () => {
     const { axes, buttons } = this.gamepads[0];
-    let change = false;
+    const change = true;
 
     const buttonsHash = buttons
       .filter(button => buttonPressed(button))
       .join(',');
 
     if (buttonsHash !== this.buttonsHash) {
-      change = true;
+      // change = true;
       this.buttonsHash = buttonsHash;
     }
 
     const axesHash = axes.reduce((a, b) => a + b, 0);
 
     if (axesHash !== this.axesHash) {
-      change = true;
+      // change = true;
       this.axesHash = axesHash;
     }
 
