@@ -23,8 +23,8 @@ function vectorFromJoystick({ x, y }) {
 
   const rawMagnitude = Math.sqrt(x ** 2 + y ** 2);
   const maxMagnitude = Math.abs(x) > Math.abs(y)
-    ? 1 / Math.sin(direction)
-    : 1 / Math.cos(direction);
+    ? 1 / Math.cos(direction)
+    : 1 / Math.sin(direction);
   const magnitude = Math.min(1, rawMagnitude / Math.abs(maxMagnitude));
 
   return { direction, directionAbsolute, magnitude };
