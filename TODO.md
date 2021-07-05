@@ -3,10 +3,10 @@ TODO
 
 Controls
 ----------------
-[ ] Stubbed controller
+[x] Stubbed controller
 [x] Find replacement libraries
 [ ] Basic controls
-[ ] Leaning (first movement milestone)
+[x] Leaning (first movement milestone)
 [ ] Jumping (obvs. you expect me to make a non-jumping spider robot?)
 [ ] Toggles (crouch, movement speed, etc)
 
