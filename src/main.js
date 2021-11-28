@@ -25,8 +25,8 @@ let exit = () => {
 void async function main() {
   let state = init();
 
-  // Only settle even filters at first to reduce the chance of drawing too much
-  // power at once and causing the pi to shutoff due to undervoltage.
+  // Only settle half of servos at first to reduce the chance of drawing too
+  // much power at once and causing the pi to shutoff due to undervoltage.
   state.settleServoFilter = ({ index }) => index % 2 === 0;
 
   // Start settling all servos once initialization period is over.
