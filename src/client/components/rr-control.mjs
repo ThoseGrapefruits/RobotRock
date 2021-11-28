@@ -63,42 +63,37 @@ class RRControlElement extends LitElement {
 
   lööp = () => {
     const { axes, buttons } = this.gamepads[0];
-    const change = true;
 
     const buttonsHash = buttons
       .filter(button => buttonPressed(button))
       .join(',');
 
     if (buttonsHash !== this.buttonsHash) {
-      // change = true;
       this.buttonsHash = buttonsHash;
     }
 
     const axesHash = axes.reduce((a, b) => a + b, 0);
 
     if (axesHash !== this.axesHash) {
-      // change = true;
       this.axesHash = axesHash;
     }
 
-    if (change) {
-      sockJSON({
-        input: {
-          buttonsPressed: buttons.flatMap((button, index) =>
-            buttonPressed(button) ? [ index ] : []),
-          axes: {
-            left: {
-              x: axes[0],
-              y: axes[1]
-            },
-            right: {
-              x: axes[2],
-              y: axes[3]
-            }
+    sockJSON({
+      input: {
+        buttonsPressed: buttons.flatMap((button, index) =>
+          buttonPressed(button) ? [ index ] : []),
+        axes: {
+          left: {
+            x: axes[0],
+            y: axes[1]
+          },
+          right: {
+            x: axes[2],
+            y: axes[3]
           }
         }
-      });
-    }
+      }
+    });
 
     requestAnimationFrame(this.lööp);
   };
@@ -127,30 +122,7 @@ class RRControlElement extends LitElement {
     return html`
       <p>${ controllerCount } controllers connected.</p>
       <ul>
-      ${ Object.values(this.gamepads).map(({
-        axes, buttons, id, index
-      }) => html`
-        <h2>${ id }</h2>
-        <dl>
-          <dt>Axes
-          <dd>
-            <rr-axis-plot .x="${ axes[0] }" .y="${ axes[1] }"></rr-axis-plot>
-            <rr-axis-plot .x="${ axes[2] }" .y="${ axes[3] }"></rr-axis-plot>
-
-          <dt>Buttons
-          <dd>${ buttons.length }
-
-          <dt>Index
-          <dd>${ index }
-        </dl>
-        <h4>Pressed buttons</h4>
-        <ul>
-          ${ buttons.flatMap((button, index) => buttonPressed(button)
-            ? [ html`<li>${ index }` ]
-            : [])
-          }
-        </ul>
-      `) }
+      ${ Object.values(this.gamepads).map(renderGamepad) }
       </ul>
     `;
   }
@@ -169,4 +141,28 @@ function buttonPressed(b) {
     return b.pressed;
   }
   return b == 1.0;
+}
+
+function renderGamepad({ axes, buttons, id, index }) {
+  return html`
+    <h2>${ id }</h2>
+    <dl>
+      <dt>Axes
+      <dd>
+        <rr-axis-plot .x="${ axes[0] }" .y="${ axes[1] }"></rr-axis-plot>
+        <rr-axis-plot .x="${ axes[2] }" .y="${ axes[3] }"></rr-axis-plot>
+
+      <dt>Buttons
+      <dd>${ buttons.length }
+
+      <dt>Index
+      <dd>${ index }
+    </dl>
+    <h4>Pressed buttons</h4>
+    <ul>
+      ${ buttons.flatMap((button, index) =>
+        buttonPressed(button) ? [ html`<li>${ index }</li>` ] : [])
+      }
+    </ul>
+  `;
 }

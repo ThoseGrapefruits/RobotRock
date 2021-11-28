@@ -21,8 +21,6 @@ function move(context) {
     [ axes.left.magnitude, axes.right.magnitude ]
       .some(magnitude => DEAD_ZONE <= magnitude);
   
-  // console.log(shouldMove, axes.left.magnitude, axes.right.magnitude);
-  
   if (shouldMove) {
     const { servos } = state;
 
@@ -33,7 +31,7 @@ function move(context) {
       const legs = servos.legs[side] 
 
       legs.forEach(({ elbow, shoulder }, legIndex) => {
-        // casting boolean to number, sorry
+        // casting boolean to number
         const shift = (legIndex % 2 === sideIndex % 2) * PI / 2;
 
         const elbowPosition
@@ -61,13 +59,6 @@ function move(context) {
       moved: shouldMove
     }
   };
-}
-
-function scaleAngleToServo(angle, servo, neutralAngle = 0) {
-  const relativeAngle = angle + neutralAngle;
-  const { rangeAngle } = servo.position;
-
-  return relativeAngle * rangeAngle / 3 + servo.position.mid;
 }
 
 module.exports = move;

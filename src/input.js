@@ -8,7 +8,7 @@ function addInputListener(callback) {
 }
 
 function handleRawInput(rawInput) {
-  const { input } = JSON.parse(rawInput);
+  const { input } = JSON.parse(rawInput) || {};
 
   if (!input) {
     return;

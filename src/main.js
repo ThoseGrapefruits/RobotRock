@@ -29,6 +29,11 @@ void async function main() {
   // power at once and causing the pi to shutoff due to undervoltage.
   state.settleServoFilter = ({ index }) => index % 2 === 0;
 
+  // Start settling all servos once initialization period is over.
+  setTimeout(() => {
+    delete state.settleServoFilter;
+  }, 500);
+
   addInputListener((input, timeSinceLastInput) => {
     state = step({
       input,
@@ -46,11 +51,6 @@ void async function main() {
       timeSinceLastTick: seconds * NANO + nanoseconds,
     });
   }, TICK_INTERVAL);
-
-  // Start settling all servos once initialization period is over.
-  setTimeout(() => {
-    delete state.settleServoFilter;
-  }, 500);
 
   const server = await startServer({
     handleRawInput

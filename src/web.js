@@ -5,7 +5,7 @@ const process = require('process');
 
 const cwd = process.cwd();
 
-express.static.mime.define({'application/javascript': ['md']});
+express.static.mime.define({ 'application/javascript': [ 'md' ] } );
 
 async function startServer({
   handleRawInput
