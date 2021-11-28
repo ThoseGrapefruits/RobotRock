@@ -16,5 +16,8 @@
     "express-ws": "^4.0.0",
     "kalmanjs": "^1.1.0",
     "mpu6050-gyro": "^1.1.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.3.0"
   }
 }
