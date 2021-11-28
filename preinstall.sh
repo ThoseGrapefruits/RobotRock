@@ -12,6 +12,7 @@ echo 'Making device writable'
 chmod o+rw /dev/i2c*
 
 echo 'Installing gcc'
-apt-get install gcc-4.9 g++-4.9
+apt-get update
+apt-get install gcc-4.9 g++-4.9 opencv@2
 update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 40 --slave /usr/bin/g++ g++ /usr/bin/g++-4.9
 update-alternatives --config gcc 

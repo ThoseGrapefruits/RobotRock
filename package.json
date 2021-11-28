@@ -15,7 +15,8 @@
     "express": "^4.17.1",
     "express-ws": "^4.0.0",
     "kalmanjs": "^1.1.0",
-    "mpu6050-gyro": "^1.1.1"
+    "mpu6050-gyro": "^1.1.1",
+    "opencv": "^7.0.0"
   },
   "devDependencies": {
     "eslint": "^8.3.0"
