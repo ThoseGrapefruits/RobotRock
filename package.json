@@ -7,7 +7,7 @@
   "scripts": {
     "watch": "node ./watch.js start:main",
     "start:main": "node ./src/main.js",
-    "preinstall": "sudo sh ./preinstall.sh"
+    "preinstall": "sh ./preinstall.sh"
   },
   "dependencies": {
     "adafruit-pca9685": "^0.1.4",
