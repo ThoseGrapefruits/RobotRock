@@ -1,4 +1,4 @@
-import { html, LitElement } from 'https://unpkg.com/lit-element/lit-element.js?module';
+import { html, LitElement } from 'https://unpkg.com/lit-element@2/lit-element.js?module';
 
 class RRDebugPanelElement extends LitElement {
   static get properties() {

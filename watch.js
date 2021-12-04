@@ -42,7 +42,7 @@ function exit(err) {
 }
 
 async function killAppProcesses() {
-  if (appProcesses?.length) {
+  if (appProcesses && appProcesses.length) {
     return await Promise.all(
       appProcesses
         .map(process =>

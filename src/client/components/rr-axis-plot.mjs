@@ -1,4 +1,4 @@
-import { css, html, LitElement } from 'https://unpkg.com/lit-element/lit-element.js?module';
+import { css, html, LitElement } from 'https://unpkg.com/lit-element@2/lit-element.js?module';
 
 const SCALE = 20;
 const THETA = Math.PI * 2;
@@ -6,12 +6,8 @@ const THETA = Math.PI * 2;
 class RRAxisPlotElement extends LitElement {
   static get properties() {
     return {
-      x: {
-        type: Number
-      },
-      y: {
-        type: Number
-      }
+      x: { type: Number },
+      y: { type: Number }
     };
   }
 

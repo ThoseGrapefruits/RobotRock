@@ -1,21 +1,22 @@
-import { css, html, LitElement } from 'https://unpkg.com/lit-element/lit-element.js?module';
+import { css, html, LitElement } from 'https://unpkg.com/lit-element@2/lit-element.js?module';
 import { sockJSON } from '/sockem-bopper.mjs';
 
 import '/components/rr-axis-plot.mjs';
 
 const rrGamepads = Symbol();
-const rrRAFHandle = Symbol();
+const rrIntervalHandle = Symbol();
 
 class RRControlElement extends LitElement {
   static get properties() {
     return {
       [rrGamepads]: { attribute: false, type: Object },
+      activeGamepadIndex: { attribute: false, type: Number },
       axesHash: { attribute: false, type: Array },
       buttonsHash: { attribute: false, type: Array }
     };
   }
 
-  [rrRAFHandle];
+  [rrIntervalHandle];
 
   static get styles() {
     return css`
@@ -25,27 +26,39 @@ class RRControlElement extends LitElement {
     `;
   }
 
+  get activeGamepad() {
+    if (this.activeGamepadIndex == null) {
+      return null;
+    }
+
+    return navigator.getGamepads()[this.activeGamepadIndex];
+  }
+
+  get gamepadCount() {
+    return countKeys(this.gamepads)
+  }
+
   get gamepads() {
     return this[rrGamepads];
   }
 
   set gamepads(gamepads) {
-    this.stopRAF();
+    this.stopInterval();
 
     this[rrGamepads] = gamepads;
 
     if (countKeys(gamepads)) {
-      this.startRAF();
+      this.startInterval();
     }
   }
 
-  startRAF() {
-    this[rrRAFHandle] = requestAnimationFrame(this.lööp);
+  startInterval() {
+    this[rrIntervalHandle] = setInterval(this.lööp, 100);
   }
 
-  stopRAF() {
-    if (this[rrRAFHandle]) {
-      cancelAnimationFrame(this[rrRAFHandle]);
+  stopInterval() {
+    if (this[rrIntervalHandle]) {
+      clearInterval(this[rrIntervalHandle]);
     }
   }
 
@@ -55,14 +68,34 @@ class RRControlElement extends LitElement {
       ...this.gamepads,
       [gamepad.index]: gamepad
     }
+
+    let gamepads = Object.values(this.gamepads);
+
+    switch (gamepads.length) {
+      case 0:
+        break;
+      case 1:
+        this.activeGamepadIndex = gamepads[0].index
+        break;
+    }
   };
 
   handleGamepadDisconnected = event => {
     delete this.gamepads[event.gamepad.index];
   };
 
+  handleSelectGamepad = event => {
+    this.activeGamepadIndex = event.target.dataset.id;
+  };
+
   lööp = () => {
-    const { axes, buttons } = this.gamepads[0];
+    let { activeGamepad } = this;
+
+    if (!activeGamepad) {
+      return;
+    }
+
+    const { axes, buttons } = activeGamepad;
 
     const buttonsHash = buttons
       .filter(button => buttonPressed(button))
@@ -95,7 +128,7 @@ class RRControlElement extends LitElement {
       }
     });
 
-    requestAnimationFrame(this.lööp);
+    this.requestUpdate();
   };
 
   connectedCallback() {
@@ -112,17 +145,28 @@ class RRControlElement extends LitElement {
   }
 
   render() {
-    const controllerCount = countKeys(this.gamepads)
-    if (controllerCount === 0) {
+    if (this.gamepadCount === 0) {
       return html`
         <p>Connect a controller and press any button.</p>
       `;
     }
 
+    if (this.activeGamepad) {
+      return html`
+        ${ renderGamepad.call(this, this.activeGamepad) }
+        <hr>
+        ${ this.renderGamepadOptions() }
+      `;
+    }
+
+    return this.renderGamepadOptions();
+  }
+
+  renderGamepadOptions() {
     return html`
-      <p>${ controllerCount } controllers connected.</p>
+      <p>${ this.gamepadCount } controllers connected.</p>
       <ul>
-      ${ Object.values(this.gamepads).map(renderGamepad) }
+        ${ Object.values(this.gamepads).map(renderGamepadOption.bind(this)) }
       </ul>
     `;
   }
@@ -145,7 +189,7 @@ function buttonPressed(b) {
 
 function renderGamepad({ axes, buttons, id, index }) {
   return html`
-    <h2>${ id }</h2>
+    <h4>${ id }</h4>
     <dl>
       <dt>Axes
       <dd>
@@ -164,5 +208,17 @@ function renderGamepad({ axes, buttons, id, index }) {
         buttonPressed(button) ? [ html`<li>${ index }</li>` ] : [])
       }
     </ul>
+  `;
+}
+
+function renderGamepadOption({ id, index }) {
+  return html`
+    <h4>${ id }</h4>
+    <button
+      @click="${ this.handleSelectGamepad }"
+      data-id="${ index }"
+      ?disabled="${ index === this.activeGamepadIndex }">
+      Use this gamepad
+    </button>
   `;
 }
