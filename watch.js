@@ -12,7 +12,7 @@ void async function startWatch() {
   chokidar
     .watch(cwd, {
       ignoreInitial: true,
-      ignored: /\.test-cache|node_modules/
+      ignored: /\.test-cache|node_modules|opencv*/
     })
     .on('all', reload)
     .on('ready', reload)
@@ -21,19 +21,19 @@ void async function startWatch() {
 
 function createAppProcesses() {
   const msg = appProcesses ? 'restarted' : 'started';
+  appProcesses = new Map;
 
-  appProcesses = commands.map(command => {
+  for (let command of commands) {
     const process = cp.exec(`npm run ${ command }`, {
-      stdio: "inherit",
-      shell: true
+      stdio: "inherit"
     })
       .on('error', onAppProcessError(command))
       .on('exit', onAppProcessExit(command));
 
     console.log(`Robot ${ msg } (${ command })`);
 
-    return process;
-  });
+    appProcesses.set(command, process);
+  }
 }
 
 function exit(err) {
@@ -42,7 +42,7 @@ function exit(err) {
 }
 
 async function killAppProcesses() {
-  if (appProcesses && appProcesses.length) {
+  if (appProcesses && appProcesses.size) {
     return await Promise.all(
       appProcesses
         .map(process =>
@@ -57,6 +57,7 @@ async function killAppProcesses() {
 
 function onAppProcessError(command) {
   return (error) => {
+    appProcesses.delete(command);
     console.error(error);
     console.log(`Robot encountered an error (npm run ${ command })`);
   };
@@ -64,6 +65,7 @@ function onAppProcessError(command) {
 
 function onAppProcessExit(command) {
   return () => {
+    appProcesses.delete(command);
     console.log(`Robot stopped (npm run ${ command })`);
   };
 }
