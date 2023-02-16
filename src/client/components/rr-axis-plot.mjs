@@ -32,7 +32,7 @@ class RRAxisPlotElement extends LitElement {
     if (!canvas) {
       return;
     }
-    
+
     const { x, y } = this;
     const context = this.canvas.getContext('2d');
     window.context = window.context ?? context;

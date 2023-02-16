@@ -5,6 +5,7 @@
     "node": "9"
   },
   "scripts": {
+    "lint": "eslint . --fix",
     "watch": "node ./watch.js start:main",
     "start:main": "node ./src/main.js",
     "preinstall": "sh ./preinstall.sh"
