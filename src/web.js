@@ -29,6 +29,8 @@ async function startServer({
       console.log('WebSocket was closed')
     })
   });
+
+  console.log('Web server listening on http://raspberrypi.local:8080')
   
   return app.listen(8080);
 }

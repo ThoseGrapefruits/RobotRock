@@ -151,6 +151,8 @@ function initServo(index, { position={} }={}) {
   };
 }
 
+// UTIL ////////////////////////////////////////////////////////////////////////
+
 function assertNonNaN(x) {
   if (isNaN(x)) {
     throw new Error('NaN');
