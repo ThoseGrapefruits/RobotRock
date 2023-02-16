@@ -4,7 +4,7 @@ const { addInputListener, handleRawInput } = require('./input.js');
 const settleServos = require('./state/settle-servos.js');
 
 const NANO = 1e9;
-const TICK_INTERVAL = 10;
+const TICK_INTERVAL = 33; // 30 ticks per second
 
 let exit = () => {
   process.exit(0); // in case we get killed during init
@@ -25,14 +25,7 @@ let exit = () => {
 void async function main() {
   let state = init();
 
-  // Only settle half of servos at first to reduce the chance of drawing too
-  // much power at once and causing the pi to shutoff due to undervoltage.
-  state.settleServoFilter = ({ index }) => index % 2 === 0;
-
-  // Start settling all servos once initialization period is over.
-  setTimeout(() => {
-    delete state.settleServoFilter;
-  }, 500);
+  setStartupSettlerFilter(state);
 
   addInputListener((input, timeSinceLastInput) => {
     state = step({
@@ -43,7 +36,7 @@ void async function main() {
   });
 
   let lastTickTime = process.hrtime();
-  const interval = setInterval(() => {
+  const tickInterval = setInterval(() => {
     const [ seconds, nanoseconds ] = process.hrtime(lastTickTime)
     lastTickTime = process.hrtime();
     state = tick({
@@ -59,12 +52,10 @@ void async function main() {
   await new Promise(resolve => {
     console.log('Robot running!');
     exit = async () => {
-      clearInterval(interval);
+      clearInterval(tickInterval);
 
       // This should be the right thing to do but it seems to kill the PWM
-      // if (state) {
-      //   state.pwm.stop()
-      // }
+      // if (state) state.pwm.stop()
 
       await server.close();
       resolve();
@@ -119,6 +110,21 @@ process.on('SIGINT', () => {
 //     ╭╯   ╰╮  7  ╭─────────────╮  6  ╭╯   ╰╮
 //     ╰╮    ╰─────╯             ╰─────╯    ╭╯
 //      ╰────╯                         ╰────╯
+
+// Settle servos individually until we know they're starting from a reasonable
+// position. Settling them all to neutral on startup can cause the control board
+// to draw too much power and crash the pi. This should never be awaited.
+async function setStartupSettlerFilter(state) {
+  let maxSettleIndex = 0;
+  state.settleServoFilter = ({ index }) => index <= maxSettleIndex;
+
+  for (let _ of state.servos.all()) {
+    await new Promise(resolve => setTimeout(resolve, 50));
+    maxSettleIndex++;
+  }
+
+  delete state.settleServoFilter;
+}
 
 function step(context) {
   context = assert(normalizeInput(context));
