@@ -4,7 +4,7 @@ const { addInputListener, handleRawInput } = require('./input.js');
 const settleServos = require('./state/settle-servos.js');
 
 const NANO = 1e9;
-const TICK_INTERVAL = 33; // 30 ticks per second
+const TICK_INTERVAL = 10; // 100Hz
 
 let exit = () => {
   process.exit(0); // in case we get killed during init
@@ -73,13 +73,13 @@ process.on('SIGINT', () => {
 //                       90°
 //
 //
-//
+//                        ^
 //             -      ┌───────┐
-//             │    ╒═╡  fwd  ╞═╕
+//             │  0 ╒═╡ front ╞═╕ 3
 //            ┌┴┐  1 0│       │X 11
-// π 180°      Y    ╒═╡   13  ╞═╕          0° 0
+// π 180°      Y  1 ╒═╡   13  ╞═╕ 4        0° 0
 //            └┬┘  3 2│  12   │8 9
-//             │    ╒═╡       ╞═╕
+//             │  2 ╒═╡       ╞═╕ 5
 //             +   5 4┕━━━━━━━┙6 7
 //
 //                 - ───[ X ]─── +
@@ -104,7 +104,7 @@ process.on('SIGINT', () => {
 //                                            
 //                 ╭───╮     ╭───╮            
 //                 └┐ ┌┘     └┐ ┌┘
-//         ╭─═════──┴─┴───────┴─┴──═════─╮
+//         ╭─══════─┴─┴───────┴─┴─══════─╮
 //       ╭─╯   5                     4   ╰─╮
 //      ╭╯  ╮                           ╭  ╰╮
 //     ╭╯   ╰╮  7  ╭─────────────╮  6  ╭╯   ╰╮

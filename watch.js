@@ -44,13 +44,12 @@ function exit(err) {
 async function killAppProcesses() {
   if (appProcesses && appProcesses.size) {
     return await Promise.all(
-      appProcesses
-        .map(process =>
-          new Promise(resolve => {
-            process.on('exit', resolve);
-            process.kill();
-          })
-        )
+      [ ...appProcesses.values() ].map(process =>
+        new Promise(resolve => {
+          process.on('exit', resolve);
+          process.kill();
+        })
+      )
     );
   }
 }

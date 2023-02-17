@@ -82,9 +82,9 @@ function initServo(index, { position={} }={}) {
   return {
     index,
     pid: new PID({
-      kP: 0.05,
-      kI: 0.01,
-      kD: 0,
+      kP: 0.06,
+      kI: 0.005,
+      kD: 0.001,
     }),
 
     position: {

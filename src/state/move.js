@@ -1,7 +1,11 @@
 const { scaleAxisToServo } = require('../util/index.js');
 
-const SPEED = 0.1;
-const DEAD_ZONE = 0.05;
+const ELBOW_RIGIDITY = 1.5;
+const SHOULDER_RIGIDITY = 2;
+
+const SPEED = 0.5;
+const DEAD_ZONE = 0.02;
+
 const { PI } = Math
 
 const distances = {
@@ -15,7 +19,9 @@ function move(context) {
   const {
     state,
     input: { axes }
-   } = context;
+  } = context;
+
+  let moved = new Set();
 
   const shouldMove = !state.leaned &&
     [ axes.left.magnitude, axes.right.magnitude ]
@@ -31,19 +37,25 @@ function move(context) {
       const legs = servos.legs[side] 
 
       legs.forEach(({ elbow, shoulder }, legIndex) => {
-        // casting boolean to number
+        // casting boolean to number, fite me
         const shift = (legIndex % 2 === sideIndex % 2) * PI / 2;
+        const offset = getOffset(legIndex);
 
-        const elbowPosition
-          = scaleAxisToServo(Math.sin(distance + shift) / 3, elbow);
-        elbow.position.current = elbowPosition;
+        if (Math.abs(axis.y) >= DEAD_ZONE) {
+          moved.add(elbow.index);
+          moved.add(shoulder.index);
+        }
+
+        const elbowPosition = scaleAxisToServo(
+          Math.sin(distance + shift) / ELBOW_RIGIDITY,
+          elbow
+        );
         elbow.position.goal = elbowPosition;
 
         const shoulderPosition = scaleAxisToServo(
-          Math.sin(-distance + shift) / 3,
+          (Math.sin(-distance + shift) + offset) / SHOULDER_RIGIDITY,
           shoulder
         );
-        shoulder.position.current = shoulderPosition;
         shoulder.position.goal = shoulderPosition;
       });
     })
@@ -56,9 +68,19 @@ function move(context) {
     ...context,
     state: {
       ...state,
-      moved: shouldMove
+      moved
     }
   };
+}
+
+function getOffset(legIndex) {
+  switch (legIndex) {
+    case 0:  // fallthrough
+    case 3:  return -PI / 4;
+    case 2:  // fallthrough
+    case 5:  return PI / 4;
+    default: return 0
+  }
 }
 
 module.exports = move;
