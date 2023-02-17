@@ -1,4 +1,4 @@
-import { html, render } from 'https://unpkg.com/lit-html/lit-html.js?module';
+import { html, render } from 'https://unpkg.com/lit-html@2/lit-html.js?module';
 
 import '/components/rr-client.mjs';
 
