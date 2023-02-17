@@ -25,6 +25,8 @@ let exit = () => {
 void async function main() {
   let state = init();
 
+  await new Promise(resolve => setTimeout(resolve, 100));
+
   setStartupSettlerFilter(state);
 
   addInputListener((input, timeSinceLastInput) => {
@@ -53,11 +55,15 @@ void async function main() {
     console.log('Robot running!');
     exit = async () => {
       clearInterval(tickInterval);
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // This should be the right thing to do but it seems to kill the PWM
-      // if (state) state.pwm.stop()
+      if (state) state.pwm.stop();
 
       await server.close();
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      console.log('\nRobot cleanly stopped.');
       resolve();
       process.exit(0);
     };
@@ -104,8 +110,8 @@ process.on('SIGINT', () => {
 //                                            
 //                 ╭───╮     ╭───╮            
 //                 └┐ ┌┘     └┐ ┌┘
-//         ╭─══════─┴─┴───────┴─┴─══════─╮
-//       ╭─╯   5                     4   ╰─╮
+//        ╭──══════─┴─┴───────┴─┴─══════──╮
+//       ╭╯    5                     4    ╰╮
 //      ╭╯  ╮                           ╭  ╰╮
 //     ╭╯   ╰╮  7  ╭─────────────╮  6  ╭╯   ╰╮
 //     ╰╮    ╰─────╯             ╰─────╯    ╭╯
@@ -115,12 +121,25 @@ process.on('SIGINT', () => {
 // position. Settling them all to neutral on startup can cause the control board
 // to draw too much power and crash the pi. This should never be awaited.
 async function setStartupSettlerFilter(state) {
-  let maxSettleIndex = 0;
-  state.settleServoFilter = ({ index }) => index <= maxSettleIndex;
+  let servosActive = new Set;
+  let servosRemaining = new Set(
+    [ ...state.servos.all() ].map(servo => servo.index)
+  );
 
-  for (let _ of state.servos.all()) {
+  state.settleServoFilter = ({ index }) => servosActive.has(index);
+
+  while (servosRemaining.size) {
+    let index = Math.floor(Math.random() * servosRemaining.size);
+    let servosIterator = servosRemaining.values()
+    let servoIndex = servosIterator.next().value;
+
+    for (let i = 1; i < index; i++) {
+      servoIndex = servosIterator.next().value;
+    }
+
+    servosActive.add(servoIndex);
+    servosRemaining.delete(servoIndex);
     await new Promise(resolve => setTimeout(resolve, 50));
-    maxSettleIndex++;
   }
 
   delete state.settleServoFilter;

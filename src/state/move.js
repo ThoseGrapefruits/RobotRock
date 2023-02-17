@@ -21,7 +21,9 @@ function move(context) {
     input: { axes }
   } = context;
 
-  let moved = new Set();
+  let { moved=new Set } = state;
+
+  moved.clear();
 
   const shouldMove = !state.leaned &&
     [ axes.left.magnitude, axes.right.magnitude ]
@@ -79,6 +81,7 @@ function getOffset(legIndex) {
     case 3:  return -PI / 4;
     case 2:  // fallthrough
     case 5:  return PI / 4;
+
     default: return 0
   }
 }

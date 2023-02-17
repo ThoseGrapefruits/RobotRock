@@ -21,9 +21,7 @@ function initRobot({
       y: new PID(pid)
     },
 
-    pwm: makePWM({
-      debug: true
-    }),
+    pwm: makePWM(),
     servos: {
       * all() {
         yield * this.legs.all();
