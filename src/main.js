@@ -2,9 +2,7 @@ const { normalizeInput, init, lean, move, stand } = require('./state/index.js');
 const { startServer } = require('./web.js');
 const { addInputListener, handleRawInput } = require('./input.js');
 const settleServos = require('./state/settle-servos.js');
-const onGC = require('./util/on-gc.js');
 
-const GC_TIME = 500; // ms
 const NANO = 1e9;
 const TICK_INTERVAL = 16.67; // ms (60Hz)
 
@@ -48,21 +46,7 @@ void async function main() {
       timeSinceLastTick: seconds * NANO + nanoseconds,
     });
   };
-  let tickInterval = setInterval(onTick, TICK_INTERVAL);
-
-  // Pause during GC to avoid drawing too much of our enemy's power.
-  const handleGC = () => {
-    console.log('GC: pause tick');
-    if (tickInterval) tickInterval = clearInterval(tickInterval);
-    setTimeout(() => {
-      console.log('GC: resume tick');
-      if (!tickInterval) tickInterval = setInterval(onTick, TICK_INTERVAL)
-    }, GC_TIME);
-
-    onGC(handleGC);
-  };
-
-  onGC(handleGC);
+  const tickInterval = setInterval(onTick, TICK_INTERVAL);
 
   const server = await startServer({
     handleRawInput
