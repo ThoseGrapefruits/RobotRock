@@ -1,7 +1,7 @@
 const { scaleAxisToServo } = require('../util/index.js');
 
 const ELBOW_RIGIDITY = 1.5;
-const SHOULDER_RIGIDITY = 2;
+const SHOULDER_RIGIDITY = 1;
 
 const SPEED = 0.5;
 const DEAD_ZONE = 0.02;
@@ -41,7 +41,6 @@ function move(context) {
       legs.forEach(({ elbow, shoulder }, legIndex) => {
         // casting boolean to number, fite me
         const shift = (legIndex % 2 === sideIndex % 2) * PI / 2;
-        const offset = getOffset(legIndex);
 
         if (Math.abs(axis.y) >= DEAD_ZONE) {
           moved.add(elbow.index);
@@ -55,7 +54,7 @@ function move(context) {
         elbow.position.goal = elbowPosition;
 
         const shoulderPosition = scaleAxisToServo(
-          (Math.sin(-distance + shift) + offset) / SHOULDER_RIGIDITY,
+          Math.sin(-distance + shift) / SHOULDER_RIGIDITY,
           shoulder
         );
         shoulder.position.goal = shoulderPosition;
@@ -73,17 +72,6 @@ function move(context) {
       moved
     }
   };
-}
-
-function getOffset(legIndex) {
-  switch (legIndex) {
-    case 0:  // fallthrough
-    case 3:  return -PI / 4;
-    case 2:  // fallthrough
-    case 5:  return PI / 4;
-
-    default: return 0
-  }
 }
 
 module.exports = move;

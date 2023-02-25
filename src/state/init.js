@@ -4,6 +4,12 @@ const MPU6050 = require('mpu6050-gyro');
 
 const { PID } = require('../util/index.js');
 
+const RRCurrent = Symbol();
+const RRGoal = Symbol();
+const RRMax = Symbol();
+const RRMin = Symbol();
+const RRNeutral = Symbol();
+
 function initRobot({
   pid={ kP: 5, kI: 0.01, kD: 0 },
   gyroFilter={ Q: 0.001, R: 0.1 }
@@ -26,6 +32,22 @@ function initRobot({
       * all() {
         yield * this.legs.all();
         yield * this.camera.all();
+      },
+
+      * even() {
+        for (let servo of this.all()) {
+          if (servo.index % 2 === 0) {
+            yield servo;
+          }
+        }
+      },
+
+      * odd() {
+        for (let servo of this.all()) {
+          if (servo.index % 2 !== 0) {
+            yield servo;
+          }
+        }
       },
       camera: {
         * all() {
@@ -62,71 +84,77 @@ function initRobot({
 }
 
 function initLegSide(start) {
-  return [ start, start + 2, start + 4 ].map(initLeg);
+  return [
+    { start: start,     shoulder: { min: 200, neutral: 350, max: 500 } },
+    { start: start + 2, shoulder: { min: 150, neutral: 300, max: 450 } },
+    { start: start + 4, shoulder: { min: 100, neutral: 250, max: 400 } }
+  ].map(initLeg);
 }
 
-function initLeg(start) {
+function initLeg({ shoulder, start }) {
   return {
     * all() {
       yield this.shoulder;
       yield this.elbow;
     },
-    elbow: initServo(start + 1),
-    shoulder: initServo(start)
+    elbow: initServo(start + 1, { min: 140, neutral: 300, max: 520 }),
+    shoulder: initServo(start, shoulder)
   };
 }
 
-function initServo(index, { position={} }={}) {
+function initServo(index, { max, min, neutral, position={} }={}) {
+  const middlePosition = neutral || 300;
+
   return {
     index,
     pid: new PID({
-      kP: 0.06,
-      kI: 0.005,
-      kD: 0.001,
+      kP: 0.08,
+      kI: 0.001,
+      kD: 0.0001,
     }),
 
     position: {
       // NOTE: Any "soft" updates to servo position (want to use PID) should
       // only update `goal`. Any "hard" updates should update both `current` and
       // `goal` as well as call `pwm.setPwm` directly.
-      _current: 300,
+      [RRCurrent]: middlePosition,
       get current() {
-        return this._current;
+        return this[RRCurrent];
       },
       set current(value) {
-        this._current = minmax(assertNonNaN(value), this.min, this.max);
+        this[RRCurrent] = minmax(assertNonNaN(value), this.min, this.max);
       },
 
-      _goal: 300,
+      [RRGoal]: middlePosition,
       get goal() {
-        return this._goal;
+        return this[RRGoal];
       },
       set goal(value) {
-        this._goal = minmax(assertNonNaN(value), this.min, this.max);
+        this[RRGoal] = minmax(assertNonNaN(value), this.min, this.max);
       },
 
-      _max: 520,
+      [RRMax]: max || (middlePosition + 150),
       get max() {
-        return this._max;
+        return this[RRMax];
       },
       set max(value) {
-        this._max = assertNonNaN(value);
+        this[RRMax] = assertNonNaN(value);
       },
 
-      _min: 140,
+      [RRMin]: min || (middlePosition - 150),
       get min() {
-        return this._min;
+        return this[RRMin];
       },
       set min(value) {
-        this._min = assertNonNaN(value);
+        this[RRMin] = assertNonNaN(value);
       },
 
-      _neutral: 300,
+      [RRNeutral]: middlePosition,
       get neutral() {
-        return this._neutral;
+        return this[RRNeutral];
       },
       set neutral(value) {
-        this._neutral = assertNonNaN(value);
+        this[RRNeutral] = assertNonNaN(value);
       },
 
       ...position,

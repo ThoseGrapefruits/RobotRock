@@ -3,6 +3,7 @@ function settleServos(context) {
   const {
     state: { pwm, servos, settleServoFilter }
   } = context;
+
   for (const servo of servos.all()) {
     if (settleServoFilter && !settleServoFilter(servo)) {
       continue;
