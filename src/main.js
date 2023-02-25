@@ -2,9 +2,11 @@ const { normalizeInput, init, lean, move, stand } = require('./state/index.js');
 const { startServer } = require('./web.js');
 const { addInputListener, handleRawInput } = require('./input.js');
 const settleServos = require('./state/settle-servos.js');
+const onGC = require('./util/on-gc.js');
 
+const GC_TIME = 500; // ms
 const NANO = 1e9;
-const TICK_INTERVAL = 10; // 100Hz
+const TICK_INTERVAL = 16.67; // ms (60Hz)
 
 let exit = () => {
   process.exit(0); // in case we get killed during init
@@ -19,7 +21,7 @@ let exit = () => {
 //      their desired positions, smoothed out by a PID controller.
 //
 // They can and will run in any order, flip-flopping betwween the two, but
-// because all JavaScript engines are single-threaded, only one of them will
+// because the JavaScript runtime is single-threaded, only one of them will
 // truly be running at any one time.
 
 void async function main() {
@@ -38,14 +40,29 @@ void async function main() {
   });
 
   let lastTickTime = process.hrtime();
-  const tickInterval = setInterval(() => {
+  const onTick = () => {
     const [ seconds, nanoseconds ] = process.hrtime(lastTickTime)
     lastTickTime = process.hrtime();
     state = tick({
       state,
       timeSinceLastTick: seconds * NANO + nanoseconds,
     });
-  }, TICK_INTERVAL);
+  };
+  let tickInterval = setInterval(onTick, TICK_INTERVAL);
+
+  // Pause during GC to avoid drawing too much of our enemy's power.
+  const handleGC = () => {
+    console.log('GC: pause tick');
+    if (tickInterval) tickInterval = clearInterval(tickInterval);
+    setTimeout(() => {
+      console.log('GC: resume tick');
+      if (!tickInterval) tickInterval = setInterval(onTick, TICK_INTERVAL)
+    }, GC_TIME);
+
+    onGC(handleGC);
+  };
+
+  onGC(handleGC);
 
   const server = await startServer({
     handleRawInput
@@ -56,13 +73,10 @@ void async function main() {
     exit = async () => {
       clearInterval(tickInterval);
       await new Promise(resolve => setTimeout(resolve, 100));
-
-      // This should be the right thing to do but it seems to kill the PWM
-      if (state) state.pwm.stop();
-
       await server.close();
       await new Promise(resolve => setTimeout(resolve, 100));
-
+      // This should be the right thing to do but it seems to kill the PWM sometimes
+      if (state) await state.pwm.stop();
       console.log('\nRobot cleanly stopped.');
       resolve();
       process.exit(0);
@@ -122,24 +136,29 @@ process.on('SIGINT', () => {
 // to draw too much power and crash the pi. This should never be awaited.
 async function setStartupSettlerFilter(state) {
   let servosActive = new Set;
-  let servosRemaining = new Set(
-    [ ...state.servos.all() ].map(servo => servo.index)
-  );
+  let oddServos  = new Set([ ...state.servos.odd() ].map(s => s.index));
+  let evenServos = new Set([ ...state.servos.even() ].map(s => s.index));
 
   state.settleServoFilter = ({ index }) => servosActive.has(index);
 
-  while (servosRemaining.size) {
-    let index = Math.floor(Math.random() * servosRemaining.size);
-    let servosIterator = servosRemaining.values()
-    let servoIndex = servosIterator.next().value;
+  // Do the even servos first, which contain all the shoulder joints. Makes it
+  // easier for the servos to move horizontally.
+  for (let servosRemaining of [ evenServos, oddServos ]) {
+    while (servosRemaining.size) {
+      let index = Math.floor(Math.random() * servosRemaining.size);
+      let servosIterator = servosRemaining.values()
+      let servoIndex = servosIterator.next().value;
 
-    for (let i = 1; i < index; i++) {
-      servoIndex = servosIterator.next().value;
+      for (let i = 1; i < index; i++) {
+        servoIndex = servosIterator.next().value;
+      }
+
+      servosActive.add(servoIndex);
+      servosRemaining.delete(servoIndex);
+      await new Promise(resolve => setTimeout(resolve, 50));
     }
 
-    servosActive.add(servoIndex);
-    servosRemaining.delete(servoIndex);
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise(resolve => setTimeout(resolve, 200));
   }
 
   delete state.settleServoFilter;
